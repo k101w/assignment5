@@ -1,0 +1,13 @@
+data
+checkpoints
+__pycache__
+logs
+output_cls
+output_deg
+output_seg
+q3_point_cls
+q3_point_seg
+q3_rotate_cls
+q3_rotate_cls_1
+q4
+__MACOSX

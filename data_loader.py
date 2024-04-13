@@ -9,6 +9,8 @@ class CustomDataSet(Dataset):
     def __init__(self, args, train=True):
         self.main_dir = args.main_dir 
         self.task = args.task 
+        if self.task == 'cls_2':
+            self.task = 'cls'
 
         if train:
             data_path = self.main_dir + self.task + "/data_train.npy"

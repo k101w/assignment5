@@ -1,12 +1,14 @@
 import numpy as np
 import argparse
 import torch
+torch.cuda.set_device(2)
 import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 
-from models import cls_model, seg_model
+from models import cls_model, seg_model,cls_model_2
 from data_loader import get_data_loader
 from utils import save_checkpoint, create_dir
+import pdb
 
 def train(train_dataloader, model, opt, epoch, args, writer):
     
@@ -20,7 +22,7 @@ def train(train_dataloader, model, opt, epoch, args, writer):
         labels = labels.to(args.device).to(torch.long)
 
         # ------ TO DO: Forward Pass ------
-        predictions = 
+        predictions = model(point_clouds)
 
         if (args.task == "seg"):
             labels = labels.reshape([-1])
@@ -55,7 +57,9 @@ def test(test_dataloader, model, epoch, args, writer):
 
             # ------ TO DO: Make Predictions ------
             with torch.no_grad():
-                pred_labels = 
+                pred_labels = model(point_clouds)
+                pred_labels = torch.argmax(pred_labels,dim=1)
+                
             correct_obj += pred_labels.eq(labels.data).cpu().sum().item()
             num_obj += labels.size()[0]
 
@@ -74,7 +78,8 @@ def test(test_dataloader, model, epoch, args, writer):
 
             # ------ TO DO: Make Predictions ------
             with torch.no_grad():     
-                pred_labels = 
+                pred_labels = model(point_clouds)
+                pred_labels = torch.argmax(pred_labels,dim=-1)
 
             correct_point += pred_labels.eq(labels.data).cpu().sum().item()
             num_point += labels.view([-1,1]).size()[0]
@@ -99,9 +104,11 @@ def main(args):
 
     # ------ TO DO: Initialize Model ------
     if args.task == "cls":
-        model = 
+        model = cls_model(args.device)
+    elif args.task == "cls_2":
+        model = cls_model_2(args.device)
     else:
-        model = 
+        model = seg_model(args.device)
     
     # Load Checkpoint 
     if args.load_checkpoint:
@@ -155,7 +162,7 @@ def create_parser():
     parser = argparse.ArgumentParser()
 
     # Model & Data hyper-parameters
-    parser.add_argument('--task', type=str, default="cls", help='The task: cls or seg')
+    parser.add_argument('--task', type=str, default="cls", help='The task: cls or seg or cls_2')
     parser.add_argument('--num_seg_class', type=int, default=6, help='The number of segmentation classes')
 
     # Training hyper-parameters
